@@ -6,4 +6,4 @@ services:
       dockerfile: ./build/Dockerfile
     tty: true
     volumes:
-      - ./cmd:/go/src/app
+      - ./src/app:/go/src/app
