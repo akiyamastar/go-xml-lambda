@@ -3,6 +3,7 @@ package xml
 import (
     "encoding/xml"
     "fmt"
+    "io"
     "io/ioutil"
     "net/http"
     "time"
@@ -19,6 +20,12 @@ type XML struct {
 }
 
 func GetUrls() {
+    appEnv := os.Getenv("APP_ENV")
+    filePath := "target.xml"
+    if appEnv == "Lambda" {
+        filePath = "/tmp/target.xml"
+    }
+
     start := time.Now()
     fmt.Println("main start!")
     err := godotenv.Load()
@@ -27,12 +34,18 @@ func GetUrls() {
     }
     xmlUrl := os.Getenv("XML_URL")
     if xmlUrl == "" {
-		fmt.Println("環境変数 XML_URL が設定されていません")
-		return
-	}
-	data := httpGet(xmlUrl)
+        fmt.Println("環境変数 XML_URL が設定されていません。")
+        return
+    }
+    fmt.Println(xmlUrl)
+    // data := httpGet(xmlUrl)
+    xmlDownload(xmlUrl, filePath)
+    xmlData := getXmls(filePath)
+
     result := XML{}
-    xmlErr := xml.Unmarshal([]byte(data), &result)
+    // xmlErr := xml.Unmarshal([]byte(data), &result)
+    xmlErr := xml.Unmarshal([]byte(xmlData), &result)
+    
     if xmlErr != nil {
         fmt.Printf("error: %v", xmlErr)
         return
@@ -43,18 +56,36 @@ func GetUrls() {
     for _, job := range result.Job {
         jobUrls = append(jobUrls, job.Url)
     }
-
-    fmt.Println(jobUrls)
+    // fmt.Println(jobUrls)
     fmt.Println("end!")
     end := time.Now()
-    fmt.Printf("xml数: %d\n", len(result.Job))
+    fmt.Printf("url数: %d\n", len(result.Job))
     fmt.Printf("parse時間: %f秒\n", (end.Sub(start)).Seconds())
-    
 }
 
 func httpGet(url string) string {
+    fmt.Println("httpGet!")
     response, _ := http.Get(url)
     body, _ := ioutil.ReadAll(response.Body)
     defer response.Body.Close()
     return string(body)
+}
+
+func xmlDownload(url string, filePath string) string {
+    fmt.Println("xmlDownload!")
+    response, _ := http.Get(url)
+    defer response.Body.Close()
+    out, errOut := os.Create(filePath)
+    if errOut != nil {
+        return errOut.Error()
+    }
+    defer out.Close()
+    io.Copy(out, response.Body)
+    return ""
+}
+
+func getXmls(filePath string) string {
+    xml, _ := ioutil.ReadFile(filePath)
+    xmls := string(xml)
+    return xmls
 }
