@@ -21,3 +21,4 @@ go.sum
 handler
 *.zip
 *.xml
+.DS_Store
