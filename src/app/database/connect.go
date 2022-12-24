@@ -84,13 +84,17 @@ func ReinsertNewUrls(urlList []string) {
         log.Fatal("Exec error: ", err)
         return
     }
+    // if _, err := db.Exec("SET SESSION time_zone = 'Asia/Tokyo';"); err != nil {
+    //     log.Fatal("Exec error: ", err)
+    //     return
+    // }
     
     fmt.Println("Insert New List Urls!")
     insert := os.Getenv("DB_INSERT_LIST_SQL")
 
     values := make([]interface{}, 0, len(urlList))
     for index, value := range urlList {
-        insert += fmt.Sprintf(`(%v, ?),`, index)
+        insert += fmt.Sprintf(`(%v, ?, NOW()),`, index)
         // insert += fmt.Sprintf(`( ? ),`)
         values = append(values, value)
     }
