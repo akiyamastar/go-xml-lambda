@@ -2,11 +2,12 @@ package main
 
 import(
 	"github.com/aws/aws-lambda-go/lambda"
-	// "app/database"
+	"app/database"
 	"app/xml"
 )
 func excuteFunction(){
-	xml.GetUrls()
+	xmlUrls := xml.GetUrls()
+	database.ReinsertNewUrls(xmlUrls)
 } 
 func main(){
 	lambda.Start(excuteFunction)

@@ -9,5 +9,6 @@
 ## zip for aws lambda
 
 ```:sh
-% zip src/app/function.zip src/app/handler
+% cd src/app
+% zip function.zip handler
 ```
