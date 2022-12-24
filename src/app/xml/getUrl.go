@@ -19,7 +19,9 @@ type XML struct {
     } `xml:"job"`
 }
 
-func GetUrls() {
+func GetUrls() []string {
+    var jobUrls []string
+
     appEnv := os.Getenv("APP_ENV")
     filePath := "target.xml"
     if appEnv == "Lambda" {
@@ -35,7 +37,7 @@ func GetUrls() {
     xmlUrl := os.Getenv("XML_URL")
     if xmlUrl == "" {
         fmt.Println("環境変数 XML_URL が設定されていません。")
-        return
+        return jobUrls
     }
     fmt.Println(xmlUrl)
     // data := httpGet(xmlUrl)
@@ -48,9 +50,8 @@ func GetUrls() {
     
     if xmlErr != nil {
         fmt.Printf("error: %v", xmlErr)
-        return
+        return jobUrls
     }
-    var jobUrls []string
 
     fmt.Println("start!")
     for _, job := range result.Job {
@@ -59,8 +60,10 @@ func GetUrls() {
     // fmt.Println(jobUrls)
     fmt.Println("end!")
     end := time.Now()
-    fmt.Printf("url数: %d\n", len(result.Job))
+    fmt.Printf("xml url count: %d\n", len(result.Job))
     fmt.Printf("parse時間: %f秒\n", (end.Sub(start)).Seconds())
+
+    return jobUrls
 }
 
 func httpGet(url string) string {
